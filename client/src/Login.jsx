@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { readJsonResponse } from "./utils/apiResponse";
-
-const apiBaseUrl = process.env.REACT_APP_API_URL || "";
+import { buildApiUrl } from "./utils/apiBaseUrl";
 
 function getCurrentMonthYear(date = new Date()) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -69,14 +68,42 @@ export default function Login({ onLogin, onAdminLogin, onOpenMockTeamsKm }) {
 
     try {
       setIsSubmitting(true);
-      const response = await fetch(`${apiBaseUrl}/api/admin/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ username, password })
-      });
-      const body = await readJsonResponse(response, "Admin login response was not JSON");
+      const adminLoginPayload = JSON.stringify({ username, password });
+      const adminLoginEndpoints = Array.from(new Set([
+        buildApiUrl("/api/admin/login"),
+        "/api/admin/login",
+        buildApiUrl("/api/admin-login"),
+        "/api/admin-login"
+      ]));
+      let body = null;
+      let lastError = null;
+
+      for (const endpoint of adminLoginEndpoints) {
+        try {
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: adminLoginPayload
+          });
+
+          body = await readJsonResponse(response, "Admin login response was not JSON");
+          break;
+        } catch (error) {
+          lastError = error;
+          const canRetryNextEndpoint = error.message.includes("was not JSON");
+          const canRetrySameOrigin = endpoint !== adminLoginEndpoints[adminLoginEndpoints.length - 1] && canRetryNextEndpoint;
+          if (!canRetrySameOrigin) {
+            throw error;
+          }
+        }
+      }
+
+      if (!body) {
+        throw lastError || new Error("Admin login failed");
+      }
+
       onAdminLogin(body);
     } catch (loginError) {
       setError(loginError.message);

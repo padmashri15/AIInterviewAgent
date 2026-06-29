@@ -1,7 +1,8 @@
 import { readJsonResponse } from '../utils/apiResponse';
+import { getApiBaseUrl } from '../utils/apiBaseUrl';
 
 const analyticsConfigEndpoint = '/api/public-config';
-const apiBaseUrl = process.env.REACT_APP_API_URL || '';
+const apiBaseUrl = getApiBaseUrl();
 const localAnalyticsEndpoint = `${apiBaseUrl}/api/analytics/event`;
 
 let initPromise = null;

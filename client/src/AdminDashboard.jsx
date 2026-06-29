@@ -11,8 +11,9 @@ import {
   Upload
 } from "lucide-react";
 import AnalyticsDashboard from "./AnalyticsDashboard";
+import { getApiBaseUrl } from "./utils/apiBaseUrl";
 
-const apiBaseUrl = process.env.REACT_APP_API_URL || "";
+const apiBaseUrl = getApiBaseUrl();
 const analyticsPromptStorageKey = "aiInterviewAgent.analyticsFeedbackPromptKeys";
 const roles = ["junior", "mid", "senior", "lead", "architect"];
 const questionTypes = ["Technical", "Behavioral", "Scenario-Based", "Architecture", "Domain-Specific"];

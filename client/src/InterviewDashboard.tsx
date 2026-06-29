@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Calendar, Clock, User, Code, Award, ChevronRight, Briefcase } from 'lucide-react';
 import { readJsonResponse } from './utils/apiResponse';
+import { getApiBaseUrl } from './utils/apiBaseUrl';
 
 interface FormData {
   candidateName: string;
@@ -26,7 +27,7 @@ interface Props {
   initialData?: Partial<FormData> | null;
 }
 
-const apiBaseUrl = process.env.REACT_APP_API_URL || '';
+const apiBaseUrl = getApiBaseUrl();
 
 export default function InterviewDashboard({ onStart, initialData = null }: Props) {
   const isPrefilled = Boolean(initialData);

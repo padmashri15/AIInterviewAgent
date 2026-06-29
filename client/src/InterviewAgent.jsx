@@ -6,8 +6,9 @@ import { Mic, MicOff, Play, Pause, RefreshCw, CheckCircle, XCircle, Download, Sa
 import html2pdf from 'html2pdf.js';
 import { trackEvent } from './services/analyticsService';
 import { readJsonResponse } from './utils/apiResponse';
+import { getApiBaseUrl } from './utils/apiBaseUrl';
 
-const apiBaseUrl = process.env.REACT_APP_API_URL || '';
+const apiBaseUrl = getApiBaseUrl();
 
 // Skill Matrix Definitions for Different Technologies and Roles
 const skillMatrices = {
@@ -1622,9 +1623,8 @@ Return ONLY valid JSON in this format:
   };
 
   const getSaveAssessmentUrls = () => {
-    const configuredApiUrl = process.env.REACT_APP_API_URL?.trim();
-    if (configuredApiUrl) {
-      return [`${configuredApiUrl.replace(/\/$/, '')}/api/save-assessment`];
+    if (apiBaseUrl) {
+      return [`${apiBaseUrl}/api/save-assessment`];
     }
 
     const urls = ['/api/save-assessment'];

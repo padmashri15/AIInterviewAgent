@@ -10,8 +10,9 @@ import {
   Users
 } from "lucide-react";
 import { readJsonResponse } from "./utils/apiResponse";
+import { getApiBaseUrl } from "./utils/apiBaseUrl";
 
-const apiBaseUrl = process.env.REACT_APP_API_URL || "";
+const apiBaseUrl = getApiBaseUrl();
 
 const formatPercent = (value) => `${Number(value || 0).toFixed(1).replace(".0", "")}%`;
 

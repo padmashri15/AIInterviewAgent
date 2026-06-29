@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle, Database, FileText, Play, RefreshCw } from "lucide-react";
 import { readJsonResponse } from "./utils/apiResponse";
+import { getApiBaseUrl } from "./utils/apiBaseUrl";
 
-const apiBaseUrl = process.env.REACT_APP_API_URL || "";
+const apiBaseUrl = getApiBaseUrl();
 
 const getProfilesUrl = () => `${apiBaseUrl}/api/mock-mcp/customer-profiles`;
 const getSyncUrl = () => `${apiBaseUrl}/api/mock-mcp/sync-knowledge-base`;

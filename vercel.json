@@ -19,6 +19,10 @@
       "destination": "/api/admin/login"
     },
     {
+      "source": "/api/admin-login",
+      "destination": "/api/admin-login"
+    },
+    {
       "source": "/api/health",
       "destination": "/api/health"
     },
