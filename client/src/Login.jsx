@@ -3,20 +3,19 @@ import { readJsonResponse } from "./utils/apiResponse";
 
 const apiBaseUrl = process.env.REACT_APP_API_URL || "";
 
-function formatPasswordFromDate(date) {
-  const day = String(date.getDate()).padStart(2, "0");
+function getCurrentMonthYear(date = new Date()) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = String(date.getFullYear()).slice(-2);
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${day}${month}${year}-${hours}${minutes}`;
+  const year = String(date.getFullYear());
+  return `${month}${year}`;
 }
 
-function getValidPasswords() {
-  const now = new Date();
-  const previousMinute = new Date(now.getTime() - 60000);
-  return [formatPasswordFromDate(now), formatPasswordFromDate(previousMinute)];
+function getCandidatePassword(username, date = new Date()) {
+  const usernamePrefix = username.trim().slice(0, 4).toLowerCase();
+  return `${usernamePrefix}${getCurrentMonthYear(date)}`;
+}
+
+function getCandidatePasswordExample(date = new Date()) {
+  return `user${getCurrentMonthYear(date)}`;
 }
 
 export default function Login({ onLogin, onAdminLogin, onOpenMockTeamsKm }) {
@@ -27,15 +26,24 @@ export default function Login({ onLogin, onAdminLogin, onOpenMockTeamsKm }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCandidateLogin = () => {
-    if (!username.trim()) {
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim().toLowerCase();
+
+    if (!trimmedUsername) {
       setError("Please enter a candidate name");
       return;
     }
 
-    const validPasswords = getValidPasswords();
-    if (!validPasswords.includes(password)) {
-      const currentExpected = formatPasswordFromDate(new Date());
-      setError(`Invalid password. Expected format: DDMMYY-HHMM (Current: ${currentExpected})`);
+    if (trimmedUsername.length < 4) {
+      setError("Candidate name must have at least 4 characters");
+      return;
+    }
+
+    const expectedPassword = getCandidatePassword(trimmedUsername);
+    if (trimmedPassword !== expectedPassword) {
+      const invalidMessage = "Invalid credential";
+      setError(invalidMessage);
+      window.alert(invalidMessage);
       return;
     }
 
@@ -44,7 +52,7 @@ export default function Login({ onLogin, onAdminLogin, onOpenMockTeamsKm }) {
     const interviewTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
     onLogin({
-      candidateName: username,
+      candidateName: trimmedUsername,
       technology: "swift",
       role: "architect",
       domain: "Banking",
@@ -131,7 +139,7 @@ export default function Login({ onLogin, onAdminLogin, onOpenMockTeamsKm }) {
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
-              placeholder={loginType === "admin" ? "Enter admin username" : "Enter candidate name"}
+              placeholder={loginType === "admin" ? "Enter admin username" : "Enter candidate name, e.g. user"}
             />
           </div>
 
@@ -144,11 +152,11 @@ export default function Login({ onLogin, onAdminLogin, onOpenMockTeamsKm }) {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500"
-              placeholder={loginType === "admin" ? "Enter admin password" : "DDMMYY-HHMM"}
+              placeholder={loginType === "admin" ? "Enter admin password" : getCandidatePasswordExample()}
             />
             {loginType === "candidate" && (
               <p className="mt-1 text-xs text-gray-500">
-                Candidate demo password uses current time: DDMMYY-HHMM
+                Candidate password is first 4 characters of username + current month and year.
               </p>
             )}
           </div>
