@@ -4,6 +4,14 @@
   "outputDirectory": "client/build",
   "rewrites": [
     {
+      "source": "/api/admin/login",
+      "destination": "/api/admin/login"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/health"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/index"
     },
