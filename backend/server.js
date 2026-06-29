@@ -2414,11 +2414,15 @@ function scheduleAnalyticsOptimization() {
 //   res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
 // });
 
-scheduleAnalyticsOptimization();
+if (!process.env.VERCEL) {
+  scheduleAnalyticsOptimization();
+}
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 module.exports = app;
