@@ -9,6 +9,7 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
   const [error, setError] = useState("");
   const [isRequestingCamera, setIsRequestingCamera] = useState(false);
   const [cameraStarted, setCameraStarted] = useState(false);
+  const [cameraUnavailable, setCameraUnavailable] = useState(false);
 
   useEffect(() => {
     return () => stopCamera();
@@ -38,6 +39,14 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
     return "Camera permission denied or not available. Please allow camera access and try again.";
   };
 
+  const getDeviceHelpText = () => {
+    if (window.location.protocol !== "https:" && window.location.hostname !== "localhost") {
+      return "Open the HTTPS deployed URL to use camera permissions.";
+    }
+
+    return "If this device has a camera, check browser site settings and your operating system privacy settings, then reload this page.";
+  };
+
   const startCamera = async () => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setError(getCameraErrorMessage());
@@ -46,6 +55,7 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
 
     try {
       setError("");
+      setCameraUnavailable(false);
       setIsRequestingCamera(true);
       let stream;
 
@@ -74,6 +84,7 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
     } catch (err) {
       setCameraStarted(false);
       stopCamera();
+      setCameraUnavailable(true);
       setError(getCameraErrorMessage(err));
     } finally {
       setIsRequestingCamera(false);
@@ -124,6 +135,8 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
       if (capturedImage) {
         // persist so feedback screen can read it
         localStorage.setItem('candidateImage', capturedImage);
+      } else {
+        localStorage.removeItem('candidateImage');
       }
     } catch (e) {
       // ignore storage errors
@@ -153,10 +166,24 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
             >
               {isRequestingCamera ? "Requesting Camera..." : "Enable Camera"}
             </button>
+            <button
+              type="button"
+              onClick={handleContinue}
+              className="mt-3 w-full border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-100 transition-all font-semibold"
+            >
+              Continue Without Photo
+            </button>
           </div>
         )}
 
-        {error && <p className="text-red-600 mb-4">{error}</p>}
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-left">
+            <p className="text-sm font-semibold text-red-700">{error}</p>
+            {cameraUnavailable && (
+              <p className="mt-1 text-xs text-red-700">{getDeviceHelpText()}</p>
+            )}
+          </div>
+        )}
 
         <div className="relative w-full h-80 bg-black rounded-xl overflow-hidden flex items-center justify-center">
           
@@ -195,6 +222,15 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
               className="w-full bg-[#5f1fbe] text-white py-3 rounded-xl hover:bg-[#4a1696] transition-all font-semibold"
             >
               Capture
+            </button>
+          )}
+
+          {!capturedImage && cameraUnavailable && (
+            <button
+              onClick={handleContinue}
+              className="w-full bg-gray-800 text-white py-3 rounded-xl hover:bg-gray-900 transition-all font-semibold"
+            >
+              Continue Without Photo
             </button>
           )}
 

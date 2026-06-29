@@ -888,7 +888,7 @@ Return ONLY a valid JSON object with this format (no extra text):
 
   const getMicrophonePermissionMessage = (error) => {
     if (!navigator.mediaDevices?.getUserMedia) {
-      return 'Microphone recording is not supported in this browser. Please use Chrome, Edge, or Safari on HTTPS, or type your response.';
+      return 'Microphone recording is not supported in this browser. Please type your response below.';
     }
 
     if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
@@ -896,18 +896,18 @@ Return ONLY a valid JSON object with this format (no extra text):
     }
 
     if (error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError') {
-      return 'Microphone permission is blocked. Please click the browser site settings icon near the address bar, allow Microphone, reload, and try again.';
+      return 'Microphone permission is blocked. Allow Microphone in browser site settings and reload, or type your response below.';
     }
 
     if (error?.name === 'NotFoundError' || error?.name === 'DevicesNotFoundError') {
-      return 'No microphone was found on this device. Please connect a microphone or type your response.';
+      return 'No microphone was found on this device. Please connect a microphone or type your response below.';
     }
 
     if (error?.name === 'NotReadableError') {
       return 'Microphone is already in use by another app. Close other recording apps and try again.';
     }
 
-    return 'Microphone access denied or unavailable. Please allow microphone permissions and try again.';
+    return 'Microphone access denied or unavailable. Please type your response below, or allow microphone permissions and try again.';
   };
 
   const requestMicrophonePermission = async () => {
@@ -2034,10 +2034,12 @@ Return ONLY valid JSON in this format:
                 <div className="mb-6">
                   <button
                     onClick={toggleRecording}
-                    disabled={isRequestingMicrophone}
+                    disabled={isRequestingMicrophone || microphonePermission === 'unsupported'}
                     className={`w-full py-6 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] ${
                       isRecording
                         ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg'
+                        : microphonePermission === 'unsupported'
+                          ? 'bg-gray-400 text-white shadow'
                         : 'bg-[#5f1fbe] hover:bg-[#4a1696] text-white shadow-lg'
                     }`}
                   >
@@ -2051,6 +2053,11 @@ Return ONLY valid JSON in this format:
                         <MicOff size={24} className="mr-2 animate-pulse" />
                         Stop Recording
                       </div>
+                    ) : microphonePermission === 'unsupported' ? (
+                      <div className="flex items-center justify-center">
+                        <MicOff size={24} className="mr-2" />
+                        Voice Unavailable
+                      </div>
                     ) : (
                       <div className="flex items-center justify-center">
                         <Mic size={24} className="mr-2" />
@@ -2060,7 +2067,13 @@ Return ONLY valid JSON in this format:
                   </button>
                   {!isRecording && microphonePermission !== 'granted' && (
                     <div className="mt-3 rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-gray-700">
-                      Click <strong>Start Voice Response</strong> and choose <strong>Allow</strong> in the browser popup to enable your microphone.
+                      {microphonePermission === 'denied' || microphonePermission === 'unsupported'
+                        ? 'Voice recording is optional. You can type your response below and submit it.'
+                        : (
+                          <>
+                            Click <strong>Start Voice Response</strong> and choose <strong>Allow</strong> in the browser popup to enable your microphone.
+                          </>
+                        )}
                     </div>
                   )}
                   
