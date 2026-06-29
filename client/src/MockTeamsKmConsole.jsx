@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle, Database, FileText, Play, RefreshCw } from "lucide-react";
+import { readJsonResponse } from "./utils/apiResponse";
 
 const apiBaseUrl = process.env.REACT_APP_API_URL || "";
 
@@ -20,8 +21,7 @@ export default function MockTeamsKmConsole({ onBack, onUseProfile }) {
         setIsLoading(true);
         setError("");
         const response = await fetch(getProfilesUrl());
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
+        const data = await readJsonResponse(response, "Mock Teams profiles response was not JSON");
         setProfiles(data.profiles || []);
         setSelectedProfileId(data.profiles?.[0]?.id || "");
       } catch (loadError) {
@@ -53,8 +53,7 @@ export default function MockTeamsKmConsole({ onBack, onUseProfile }) {
         body: JSON.stringify({ profileId: selectedProfile.id })
       });
 
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
+      const body = await readJsonResponse(response, "Mock Teams sync response was not JSON");
       setSyncResult(body);
     } catch (syncError) {
       setError(`Unable to sync mock Teams KM profile: ${syncError.message}`);

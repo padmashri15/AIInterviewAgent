@@ -9,6 +9,7 @@ import {
   TrendingUp,
   Users
 } from "lucide-react";
+import { readJsonResponse } from "./utils/apiResponse";
 
 const apiBaseUrl = process.env.REACT_APP_API_URL || "";
 
@@ -117,8 +118,7 @@ export default function AnalyticsDashboard({ adminToken, onReportLoaded }) {
       const response = await fetch(`${apiBaseUrl}/api/admin/analytics/optimization${refresh ? "?refresh=true" : ""}`, {
         headers: requestHeaders
       });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
+      const body = await readJsonResponse(response, "Analytics report response was not JSON");
       setReport(body);
       onReportLoaded?.(body);
     } catch (loadError) {
@@ -146,8 +146,7 @@ export default function AnalyticsDashboard({ adminToken, onReportLoaded }) {
         },
         body: JSON.stringify({})
       });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
+      const body = await readJsonResponse(response, "Analytics optimization response was not JSON");
       setReport(body.report);
       onReportLoaded?.(body.report);
       setMessage(body.message || "Analytics Optimization Agent completed successfully.");

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Calendar, Clock, User, Code, Award, ChevronRight, Briefcase } from 'lucide-react';
+import { readJsonResponse } from './utils/apiResponse';
 
 interface FormData {
   candidateName: string;
@@ -76,7 +77,7 @@ export default function InterviewDashboard({ onStart, initialData = null }: Prop
       try {
         const response = await fetch(`${apiBaseUrl}/api/customer-profiles/active`);
         if (!response.ok) return;
-        const body = await response.json();
+        const body = await readJsonResponse(response, 'Active customer profiles response was not JSON');
         setActiveProfiles(body.profiles || []);
       } catch (error) {
         console.warn('Unable to load active customer profiles', error);

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { readJsonResponse } from "./utils/apiResponse";
 
 const apiBaseUrl = process.env.REACT_APP_API_URL || "";
 
@@ -67,8 +68,7 @@ export default function Login({ onLogin, onAdminLogin, onOpenMockTeamsKm }) {
         },
         body: JSON.stringify({ username, password })
       });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
+      const body = await readJsonResponse(response, "Admin login response was not JSON");
       onAdminLogin(body);
     } catch (loginError) {
       setError(loginError.message);

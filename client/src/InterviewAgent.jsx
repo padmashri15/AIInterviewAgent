@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Play, Pause, RefreshCw, CheckCircle, XCircle, Download, Save } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import { trackEvent } from './services/analyticsService';
+import { readJsonResponse } from './utils/apiResponse';
 
 const apiBaseUrl = process.env.REACT_APP_API_URL || '';
 
@@ -505,7 +506,7 @@ Prioritize questions that test readiness for this exact customer project.`;
 
       const response = await fetch(`${apiBaseUrl}/api/analytics/question-generation-insights?${params.toString()}`);
       if (!response.ok) return null;
-      return response.json();
+      return readJsonResponse(response, 'Analytics insight response was not JSON');
     } catch (error) {
       console.warn('Unable to load analytics optimization insights', error);
       return null;
@@ -732,7 +733,7 @@ Return ONLY a valid JSON object with this format (no extra text):
         throw new Error(`API error: ${response.status}`);
       }
 
-      const result = await response.json();
+      const result = await readJsonResponse(response, 'OpenAI question generation response was not JSON');
       console.log('✅ API Response Received');
       
       if (result.choices && result.choices[0] && result.choices[0].message) {
@@ -912,10 +913,7 @@ Return ONLY a valid JSON object with this format (no extra text):
       method: 'POST',
       body: formData
     });
-    const body = await response.json();
-    if (!response.ok) {
-      throw new Error(body.error || `Transcription failed with HTTP ${response.status}`);
-    }
+    const body = await readJsonResponse(response, 'Transcription response was not JSON');
     return body.text || '';
   };
 
@@ -1368,7 +1366,7 @@ Return ONLY valid JSON in this format:
         throw new Error('OpenAI API error');
       }
 
-      const result = await response.json();
+      const result = await readJsonResponse(response, 'OpenAI evaluation response was not JSON');
       const content = result.choices[0].message.content;
       console.log('✅ Evaluation received:', content);
 
@@ -1589,7 +1587,7 @@ Return ONLY valid JSON in this format:
     const isJson = contentType.includes('application/json');
 
     if (isJson) {
-      return { body: await response.json(), isJson };
+      return { body: await readJsonResponse(response, 'Save assessment response was not JSON'), isJson };
     }
 
     const text = await response.text();

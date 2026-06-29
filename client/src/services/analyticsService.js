@@ -1,3 +1,5 @@
+import { readJsonResponse } from '../utils/apiResponse';
+
 const analyticsConfigEndpoint = '/api/public-config';
 const apiBaseUrl = process.env.REACT_APP_API_URL || '';
 const localAnalyticsEndpoint = `${apiBaseUrl}/api/analytics/event`;
@@ -23,7 +25,7 @@ const loadAnalyticsConfig = async () => {
     throw new Error(`Analytics config failed with HTTP ${response.status}`);
   }
 
-  const config = await response.json();
+  const config = await readJsonResponse(response, 'Analytics config response was not JSON');
   return config?.googleAnalytics?.measurementId || '';
 };
 
