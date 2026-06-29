@@ -212,7 +212,8 @@ function mapReportRowsToEvents(reportRows = []) {
 
 class AnalyticsOptimizationEngine {
   constructor(options = {}) {
-    this.dataDir = options.dataDir || path.join(__dirname, '..', 'data');
+    const vercelDataDir = path.join('/tmp', 'ai-interview-agent', 'data');
+    this.dataDir = options.dataDir || process.env.RUNTIME_DATA_DIR || (process.env.VERCEL ? vercelDataDir : path.join(__dirname, '..', 'data'));
     this.eventsFilePath = options.eventsFilePath || path.join(this.dataDir, 'analyticsEvents.json');
     this.reportFilePath = options.reportFilePath || path.join(this.dataDir, 'analyticsOptimization.json');
     this.exportFilePath = options.exportFilePath || process.env.ANALYTICS_EXPORT_FILE || path.join(this.dataDir, 'analyticsExport.json');

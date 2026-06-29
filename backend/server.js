@@ -34,6 +34,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5010;
 const projectRoot = path.resolve(__dirname, '..');
+const isVercel = Boolean(process.env.VERCEL);
+const runtimeRoot = isVercel ? path.join('/tmp', 'ai-interview-agent') : projectRoot;
+const runtimeDataDir = process.env.RUNTIME_DATA_DIR
+  ? path.resolve(process.env.RUNTIME_DATA_DIR)
+  : (isVercel ? path.join(runtimeRoot, 'data') : path.join(__dirname, 'data'));
+const runtimeUploadDir = isVercel ? path.join(runtimeRoot, 'uploads') : path.join(__dirname, 'uploads');
+const runtimeReportsDir = isVercel ? path.join(runtimeRoot, 'reports') : path.join(projectRoot, 'reports');
 
 // Middleware
 app.use(cors());
@@ -43,7 +50,7 @@ app.use(express.static(path.join(__dirname, '../client/build')));
 // Configure audio file storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const dir = path.join(__dirname, 'uploads');
+    const dir = runtimeUploadDir;
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -141,7 +148,7 @@ function sanitizeFilenamePart(value) {
 
 const reportStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const dir = path.join(projectRoot, 'reports');
+    const dir = runtimeReportsDir;
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -216,7 +223,7 @@ let knowledgeBase = {
 
 // Save knowledge base to file
 function saveKnowledgeBase() {
-  const filePath = path.join(__dirname, 'data', 'knowledgeBase.json');
+  const filePath = path.join(runtimeDataDir, 'knowledgeBase.json');
   const dirPath = path.dirname(filePath);
   
   if (!fs.existsSync(dirPath)) {
@@ -228,10 +235,14 @@ function saveKnowledgeBase() {
 
 // Load knowledge base from file
 function loadKnowledgeBase() {
-  const filePath = path.join(__dirname, 'data', 'knowledgeBase.json');
+  const filePath = path.join(runtimeDataDir, 'knowledgeBase.json');
+  const bundledFilePath = path.join(__dirname, 'data', 'knowledgeBase.json');
   
   if (fs.existsSync(filePath)) {
     const data = fs.readFileSync(filePath, 'utf8');
+    knowledgeBase = JSON.parse(data);
+  } else if (fs.existsSync(bundledFilePath)) {
+    const data = fs.readFileSync(bundledFilePath, 'utf8');
     knowledgeBase = JSON.parse(data);
   } else {
     saveKnowledgeBase(); // Create initial file
@@ -243,6 +254,14 @@ loadKnowledgeBase();
 
 function loadMockTeamsKnowledgeBase() {
   const filePath = path.join(__dirname, 'data', 'mockTeamsKnowledgeBase.json');
+  if (!fs.existsSync(filePath)) {
+    return {
+      mode: 'mock-unavailable',
+      source: 'local-fallback',
+      profiles: []
+    };
+  }
+
   const rawData = fs.readFileSync(filePath, 'utf8');
   return JSON.parse(rawData);
 }
@@ -365,7 +384,7 @@ function syncMockProfileToKnowledgeBase(profile) {
 
 const customerProfilesFilePath = process.env.CUSTOMER_PROFILES_FILE_PATH
   ? path.resolve(process.env.CUSTOMER_PROFILES_FILE_PATH)
-  : path.join(__dirname, 'data', 'customerProfiles.json');
+  : path.join(runtimeDataDir, 'customerProfiles.json');
 
 function ensureDataDirectory() {
   const dataDir = path.dirname(customerProfilesFilePath);
@@ -2079,7 +2098,9 @@ app.post('/api/knowledge/update', async (req, res) => {
   }
 });
 
-const assessmentExcelFilePath = path.join(projectRoot, 'AssessmentDetails.xlsx');
+const assessmentExcelFilePath = isVercel
+  ? path.join(runtimeRoot, 'AssessmentDetails.xlsx')
+  : path.join(projectRoot, 'AssessmentDetails.xlsx');
 
 const assessmentColumns = [
   { key: 'date', header: 'Date', width: 15 },

@@ -47,15 +47,33 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
     try {
       setError("");
       setIsRequestingCamera(true);
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" }
-      });
+      let stream;
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "user" } },
+          audio: false
+        });
+      } catch (err) {
+        if (err?.name !== "OverconstrainedError" && err?.name !== "ConstraintNotSatisfiedError") {
+          throw err;
+        }
+
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+      }
 
       streamRef.current = stream;
-      videoRef.current.srcObject = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
       setCameraStarted(true);
     } catch (err) {
       setCameraStarted(false);
+      stopCamera();
       setError(getCameraErrorMessage(err));
     } finally {
       setIsRequestingCamera(false);
@@ -142,12 +160,13 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
 
         <div className="relative w-full h-80 bg-black rounded-xl overflow-hidden flex items-center justify-center">
           
-          {!capturedImage && cameraStarted && (
+          {!capturedImage && (
             <video
               ref={videoRef}
               autoPlay
               playsInline
-              className="absolute w-full h-full object-cover"
+              muted
+              className={`absolute w-full h-full object-cover ${cameraStarted ? "" : "opacity-0 pointer-events-none"}`}
             />
           )}
 
