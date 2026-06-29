@@ -7,30 +7,67 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
 
   const [capturedImage, setCapturedImage] = useState(null);
   const [error, setError] = useState("");
+  const [isRequestingCamera, setIsRequestingCamera] = useState(false);
+  const [cameraStarted, setCameraStarted] = useState(false);
 
   useEffect(() => {
-  startCamera();
-
-  return () => stopCamera();
+    return () => stopCamera();
   }, []);
 
+  const getCameraErrorMessage = (err) => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      return "Camera capture is not supported in this browser. Please use Chrome, Edge, or Safari on HTTPS.";
+    }
+
+    if (window.location.protocol !== "https:" && window.location.hostname !== "localhost") {
+      return "Camera access requires HTTPS. Please open the deployed HTTPS URL.";
+    }
+
+    if (err?.name === "NotAllowedError" || err?.name === "PermissionDeniedError") {
+      return "Camera permission is blocked. Please allow camera access in your browser permission popup or site settings, then try again.";
+    }
+
+    if (err?.name === "NotFoundError" || err?.name === "DevicesNotFoundError") {
+      return "No camera was found on this device.";
+    }
+
+    if (err?.name === "NotReadableError") {
+      return "Camera is already in use by another app. Close other camera apps and try again.";
+    }
+
+    return "Camera permission denied or not available. Please allow camera access and try again.";
+  };
+
   const startCamera = async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError(getCameraErrorMessage());
+      return;
+    }
+
     try {
+      setError("");
+      setIsRequestingCamera(true);
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user" }
       });
 
       streamRef.current = stream;
       videoRef.current.srcObject = stream;
+      setCameraStarted(true);
     } catch (err) {
-      setError("Camera permission denied or not available.");
+      setCameraStarted(false);
+      setError(getCameraErrorMessage(err));
+    } finally {
+      setIsRequestingCamera(false);
     }
   };
 
   const stopCamera = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
     }
+    setCameraStarted(false);
   };
 
   const handleCapture = () => {
@@ -84,11 +121,28 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
           Align your face inside the frame
         </p>
 
+        {!capturedImage && !cameraStarted && (
+          <div className="mb-4 rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-left">
+            <h3 className="font-bold text-gray-900">Camera permission needed</h3>
+            <p className="mt-1 text-sm text-gray-700">
+              Click the button below and choose Allow in the browser popup so we can capture your candidate photo.
+            </p>
+            <button
+              type="button"
+              onClick={startCamera}
+              disabled={isRequestingCamera}
+              className="mt-3 w-full bg-[#5f1fbe] text-white py-2 rounded-lg hover:bg-[#4a1696] transition-all font-semibold disabled:opacity-60"
+            >
+              {isRequestingCamera ? "Requesting Camera..." : "Enable Camera"}
+            </button>
+          </div>
+        )}
+
         {error && <p className="text-red-600 mb-4">{error}</p>}
 
         <div className="relative w-full h-80 bg-black rounded-xl overflow-hidden flex items-center justify-center">
           
-          {!capturedImage && (
+          {!capturedImage && cameraStarted && (
             <video
               ref={videoRef}
               autoPlay
@@ -97,7 +151,7 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
             />
           )}
 
-          {!capturedImage && (
+          {!capturedImage && cameraStarted && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="w-64 h-64 rounded-full border-4 border-white shadow-xl"></div>
               <div className="absolute inset-0 bg-black opacity-40"></div>
@@ -116,7 +170,7 @@ export default function CandidateImageCapture({ loginData, onCapture }) {
         <canvas ref={canvasRef} className="hidden" />
 
         <div className="mt-6 space-y-3">
-          {!capturedImage && (
+          {!capturedImage && cameraStarted && (
             <button
               onClick={handleCapture}
               className="w-full bg-[#5f1fbe] text-white py-3 rounded-xl hover:bg-[#4a1696] transition-all font-semibold"

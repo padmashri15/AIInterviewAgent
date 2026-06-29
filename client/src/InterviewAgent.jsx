@@ -444,6 +444,8 @@ export default function InterviewAgent({ data }) {
   const interviewCompletedAtRef = useRef(null);
   const questionStartedAtRef = useRef(null);
   const [sttError, setSttError] = useState(null);
+  const [microphonePermission, setMicrophonePermission] = useState('prompt');
+  const [isRequestingMicrophone, setIsRequestingMicrophone] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [excelMessage, setExcelMessage] = useState(null);
   const [excelMessageType, setExcelMessageType] = useState('success'); // 'success' or 'error'
@@ -884,8 +886,63 @@ Return ONLY a valid JSON object with this format (no extra text):
     }
   };
 
-  const toggleRecording = () => {
-    isRecording ? stopRecording() : startRecording();
+  const getMicrophonePermissionMessage = (error) => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      return 'Microphone recording is not supported in this browser. Please use Chrome, Edge, or Safari on HTTPS, or type your response.';
+    }
+
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      return 'Microphone access requires HTTPS. Please open the deployed HTTPS URL.';
+    }
+
+    if (error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError') {
+      return 'Microphone permission is blocked. Please click the browser site settings icon near the address bar, allow Microphone, reload, and try again.';
+    }
+
+    if (error?.name === 'NotFoundError' || error?.name === 'DevicesNotFoundError') {
+      return 'No microphone was found on this device. Please connect a microphone or type your response.';
+    }
+
+    if (error?.name === 'NotReadableError') {
+      return 'Microphone is already in use by another app. Close other recording apps and try again.';
+    }
+
+    return 'Microphone access denied or unavailable. Please allow microphone permissions and try again.';
+  };
+
+  const requestMicrophonePermission = async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setSttError(getMicrophonePermissionMessage());
+      setMicrophonePermission('unsupported');
+      return null;
+    }
+
+    try {
+      setIsRequestingMicrophone(true);
+      setSttError(null);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setMicrophonePermission('granted');
+      return stream;
+    } catch (error) {
+      console.error('Microphone permission request failed', error);
+      setMicrophonePermission('denied');
+      setSttError(getMicrophonePermissionMessage(error));
+      return null;
+    } finally {
+      setIsRequestingMicrophone(false);
+    }
+  };
+
+  const toggleRecording = async () => {
+    if (isRecording) {
+      stopRecording();
+      return;
+    }
+
+    const stream = await requestMicrophonePermission();
+    if (stream) {
+      startRecording(stream);
+    }
   };
 
   const appendTranscript = (transcript) => {
@@ -917,7 +974,7 @@ Return ONLY a valid JSON object with this format (no extra text):
     return body.text || '';
   };
 
-  const startServerTranscriptionRecording = async () => {
+  const startServerTranscriptionRecording = async (permissionStream = null) => {
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
       setSttError('Audio recording is not supported in this browser. Please type your response.');
       return;
@@ -927,7 +984,7 @@ Return ONLY a valid JSON object with this format (no extra text):
       setSttError(null);
       existingContentRef.current = userResponse || '';
       audioChunksRef.current = [];
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = permissionStream || await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
 
       const mediaRecorder = new MediaRecorder(stream);
@@ -988,7 +1045,8 @@ Return ONLY a valid JSON object with this format (no extra text):
       setIsRecording(false);
       setIsTranscribing(false);
       stopMediaStream();
-      setSttError('Microphone access denied or unavailable. Please allow microphone permissions and try again.');
+      setMicrophonePermission('denied');
+      setSttError(getMicrophonePermissionMessage(error));
     }
   };
 
@@ -1143,9 +1201,9 @@ Return ONLY a valid JSON object with this format (no extra text):
     }
   };
 
-  const startRecording = () => {
+  const startRecording = (permissionStream = null) => {
     if (navigator.mediaDevices?.getUserMedia && window.MediaRecorder) {
-      startServerTranscriptionRecording();
+      startServerTranscriptionRecording(permissionStream);
     } else {
       startBrowserSpeechRecognition();
     }
@@ -1976,13 +2034,19 @@ Return ONLY valid JSON in this format:
                 <div className="mb-6">
                   <button
                     onClick={toggleRecording}
+                    disabled={isRequestingMicrophone}
                     className={`w-full py-6 rounded-xl font-semibold text-lg transition-all transform hover:scale-[1.02] ${
                       isRecording
                         ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg'
                         : 'bg-[#5f1fbe] hover:bg-[#4a1696] text-white shadow-lg'
                     }`}
                   >
-                    {isRecording ? (
+                    {isRequestingMicrophone ? (
+                      <div className="flex items-center justify-center">
+                        <Mic size={24} className="mr-2 animate-pulse" />
+                        Requesting Microphone Permission...
+                      </div>
+                    ) : isRecording ? (
                       <div className="flex items-center justify-center">
                         <MicOff size={24} className="mr-2 animate-pulse" />
                         Stop Recording
@@ -1994,6 +2058,11 @@ Return ONLY valid JSON in this format:
                       </div>
                     )}
                   </button>
+                  {!isRecording && microphonePermission !== 'granted' && (
+                    <div className="mt-3 rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-gray-700">
+                      Click <strong>Start Voice Response</strong> and choose <strong>Allow</strong> in the browser popup to enable your microphone.
+                    </div>
+                  )}
                   
                   {isRecording && (
                     <div className="mt-4">
