@@ -385,6 +385,7 @@ function syncMockProfileToKnowledgeBase(profile) {
 const customerProfilesFilePath = process.env.CUSTOMER_PROFILES_FILE_PATH
   ? path.resolve(process.env.CUSTOMER_PROFILES_FILE_PATH)
   : path.join(runtimeDataDir, 'customerProfiles.json');
+const bundledCustomerProfilesFilePath = path.join(__dirname, 'seed', 'customerProfiles.json');
 
 function ensureDataDirectory() {
   const dataDir = path.dirname(customerProfilesFilePath);
@@ -400,7 +401,10 @@ function createId(prefix = 'profile') {
 function loadCustomerProfiles() {
   ensureDataDirectory();
   if (!fs.existsSync(customerProfilesFilePath)) {
-    fs.writeFileSync(customerProfilesFilePath, JSON.stringify({ profiles: [] }, null, 2));
+    const initialProfiles = fs.existsSync(bundledCustomerProfilesFilePath)
+      ? fs.readFileSync(bundledCustomerProfilesFilePath, 'utf8')
+      : JSON.stringify({ profiles: [] }, null, 2);
+    fs.writeFileSync(customerProfilesFilePath, initialProfiles);
   }
 
   const rawData = fs.readFileSync(customerProfilesFilePath, 'utf8');

@@ -1,0 +1,294 @@
+{
+  "profiles": [
+    {
+      "id": "customer-profile-1782740046727-a3095843",
+      "customerName": "DFB Customer",
+      "projectName": "Banking react-native Project",
+      "technologyStack": "react-native",
+      "technology": "react-native",
+      "clientDomain": "Banking",
+      "domain": "Banking",
+      "roleRequirements": "Senior",
+      "mustHaveSkills": [
+        "Security best practices",
+        "OAuth2/OIDC authentication",
+        "REST API integration",
+        "Performance optimization",
+        "Automated testing",
+        "CI/CD",
+        "Architecture design",
+        "React Native architecture",
+        "Reusable component design"
+      ],
+      "preferredSkills": [
+        "Customer domain experience",
+        "Agile delivery",
+        "Production support"
+      ],
+      "interviewFocusAreas": [
+        "Security best practices",
+        "OAuth2/OIDC authentication",
+        "REST API integration",
+        "Performance optimization",
+        "Automated testing",
+        "CI/CD"
+      ],
+      "responsibilities": [
+        "Deliver project features",
+        "Collaborate with customer teams",
+        "Own quality and release readiness"
+      ],
+      "roleLevelMapping": {
+        "junior": true,
+        "mid": true,
+        "senior": true,
+        "lead": true,
+        "architect": true
+      },
+      "status": "Active",
+      "includeAnalyticsFeedbackInAssessment": false,
+      "analyticsFeedbackPreference": "exclude",
+      "analyticsFeedbackReportGeneratedAt": "2026-06-29T13:51:11.794Z",
+      "analyticsFeedbackKey": "customer-profile-1782740046727-a3095843|2|4|200|19.75|0|0|2026-06-29T13:50:32.169Z|",
+      "analyticsFeedbackSummary": "Profile activity: 2 interviews, 200% completion, average score 19.75.\nQuestion effectiveness: 0. Reports generated: 0.",
+      "analyticsFeedbackRecommendations": [],
+      "analyticsFeedbackUpdatedAt": "2026-06-29T13:51:27.410Z",
+      "requirementText": "Customer Interview Profile Customer Information Customer Name: ABC BankProject Name: Digital Banking Transformation PlatformDomain: Banking & Financial Services Project Overview ABC Bank is building a next-generation digital banking platform to modernize customer onboarding, account management, loan processing, and payment services. The platform will be developed using a microservices architecture and deployed on AWS Cloud. The solution must support high availability, security, scalability, and regulatory compliance. Technology Stack Backend Java 17 Spring Boot Spring Cloud Microservices REST APIs Kafka Redis Frontend React.js TypeScript HTML5 CSS3 Database PostgreSQL MongoDB Cloud & DevOps AWS Docker Kubernetes Jenkins Terraform Security OAuth2 JWT Spring Security Target Role Senior Full Stack Developer Experience Required 6–10 Years Must-Have Skills Technical Skills Java Spring Boot Microservices REST APIs React.js PostgreSQL MongoDB Kafka AWS Docker Kubernetes Development Practices Design Patterns SOLID Principles Unit Testing Integration Testing CI/CD Security OAuth2 JWT Authentication Secure Coding Practices Preferred Skills Banking Domain Experience Event-Driven Architecture Terraform OpenShift Performance Optimization Key Responsibilities Design scalable microservices. Develop secure REST APIs. Build responsive React applications. Integrate Kafka-based event processing. Implement cloud-native solutions on AWS. Participate in architecture discussions. Mentor junior developers. Review code and ensure quality standards. Interview Focus Areas Technical (60%) Core Java Spring Boot Microservices Kafka React.js AWS Database Design Architecture (20%) System Design Scalability Performance Security Behavioral (10%) Team Collaboration Leadership Problem Solving Domain Knowledge (10%) Banking Concepts Digital Payments Security & Compliance Example Hiring Criteria Strong Candidate Demonstrates deep expertise in Java and Microservices. Can design scalable distributed systems. Has hands-on AWS deployment experience. Shows strong React development capability. Average Candidate Good coding knowledge but limited architecture exposure. Basic cloud experience. Moderate understanding of Kafka and distributed systems. Weak Candidate Limited practical experience. Poor understanding of Microservices and Cloud concepts. Unable to explain design decisions. Interview Profile Name ABC Bank - Senior Full Stack Developer - Digital Banking Platform",
+      "uploadedDocumentName": "Customer Interview Profile.docx",
+      "questions": [
+        {
+          "id": "question-1782740013647-135158a2",
+          "customerProfileId": "customer-profile-1782740046727-a3095843",
+          "technology": "react-native",
+          "normalizedTechnology": "reactnative",
+          "roleLevel": "senior",
+          "text": "Explain how you would approach Banking react-native Project using react-native.",
+          "type": "Technical",
+          "category": "Technical",
+          "difficulty": "Senior",
+          "keyPoints": [
+            "architecture",
+            "project context",
+            "tradeoffs"
+          ],
+          "status": "Approved",
+          "approved": true,
+          "active": true,
+          "activeStatus": "Active",
+          "createdBy": "admin",
+          "createdAt": "2026-06-29T13:52:20.597Z",
+          "updatedAt": "2026-06-29T13:52:20.597Z"
+        },
+        {
+          "id": "question-1782740013647-d7ae655c",
+          "customerProfileId": "customer-profile-1782740046727-a3095843",
+          "technology": "react-native",
+          "normalizedTechnology": "reactnative",
+          "roleLevel": "senior",
+          "text": "What are the top security considerations for a Banking application?",
+          "type": "Domain-Specific",
+          "category": "Domain-Specific",
+          "difficulty": "Senior",
+          "keyPoints": [
+            "security",
+            "compliance",
+            "data protection"
+          ],
+          "status": "Draft",
+          "approved": false,
+          "active": true,
+          "activeStatus": "Active",
+          "createdBy": "admin",
+          "createdAt": "2026-06-29T13:52:20.597Z",
+          "updatedAt": "2026-06-29T13:52:20.597Z"
+        },
+        {
+          "id": "question-1782741059196-87dd9562",
+          "customerProfileId": "customer-profile-1782740046727-a3095843",
+          "technology": "react-native",
+          "normalizedTechnology": "reactnative",
+          "roleLevel": "senior",
+          "text": "What tradeoffs would you consider while applying Regenerate and approve customer-specific questions from the latest requirements. for a Banking application?",
+          "type": "Architecture",
+          "category": "Architecture",
+          "difficulty": "Senior",
+          "keyPoints": [
+            "tradeoffs",
+            "customer impact",
+            "risk mitigation"
+          ],
+          "status": "Draft",
+          "approved": false,
+          "active": true,
+          "activeStatus": "Active",
+          "createdBy": "analytics-optimization-agent",
+          "createdAt": "2026-06-29T13:52:20.597Z",
+          "updatedAt": "2026-06-29T13:52:20.597Z"
+        },
+        {
+          "id": "question-1782741059196-09d5a3eb",
+          "customerProfileId": "customer-profile-1782740046727-a3095843",
+          "technology": "react-native",
+          "normalizedTechnology": "reactnative",
+          "roleLevel": "senior",
+          "text": "Based on recent analytics feedback, explain how you would improve Banking react-native Project using react-native.",
+          "type": "Scenario-Based",
+          "category": "Scenario-Based",
+          "difficulty": "Senior",
+          "keyPoints": [
+            "analytics feedback",
+            "project context",
+            "practical improvement"
+          ],
+          "status": "Draft",
+          "approved": false,
+          "active": true,
+          "activeStatus": "Active",
+          "createdBy": "analytics-optimization-agent",
+          "createdAt": "2026-06-29T13:52:20.598Z",
+          "updatedAt": "2026-06-29T13:52:20.598Z"
+        },
+        {
+          "id": "question-1782741059196-fa64044d",
+          "customerProfileId": "customer-profile-1782740046727-a3095843",
+          "technology": "react-native",
+          "normalizedTechnology": "reactnative",
+          "roleLevel": "senior",
+          "text": "Tell us about a time you used feedback or metrics to improve a technical delivery outcome.",
+          "type": "Behavioral",
+          "category": "Behavioral",
+          "difficulty": "Senior",
+          "keyPoints": [
+            "metrics",
+            "ownership",
+            "continuous improvement"
+          ],
+          "status": "Approved",
+          "approved": true,
+          "active": true,
+          "activeStatus": "Active",
+          "createdBy": "analytics-optimization-agent",
+          "createdAt": "2026-06-29T13:52:20.598Z",
+          "updatedAt": "2026-06-29T13:52:20.598Z"
+        },
+        {
+          "id": "question-1782741059196-edfee298",
+          "customerProfileId": "customer-profile-1782740046727-a3095843",
+          "technology": "react-native",
+          "normalizedTechnology": "reactnative",
+          "roleLevel": "senior",
+          "text": "How would you validate that the interview focus areas for DFB Customer are still aligned with current project needs?",
+          "type": "Domain-Specific",
+          "category": "Domain-Specific",
+          "difficulty": "Senior",
+          "keyPoints": [
+            "customer requirements",
+            "feedback loop",
+            "quality checks"
+          ],
+          "status": "Approved",
+          "approved": true,
+          "active": true,
+          "activeStatus": "Active",
+          "createdBy": "analytics-optimization-agent",
+          "createdAt": "2026-06-29T13:52:20.598Z",
+          "updatedAt": "2026-06-29T13:52:20.598Z"
+        },
+        {
+          "id": "question-1782740013647-5ad10a8e",
+          "customerProfileId": "customer-profile-1782740046727-a3095843",
+          "technology": "react-native",
+          "normalizedTechnology": "reactnative",
+          "roleLevel": "senior",
+          "text": "Describe a scenario where Security best practices becomes critical in delivery.",
+          "type": "Scenario-Based",
+          "category": "Scenario-Based",
+          "difficulty": "Senior",
+          "keyPoints": [
+            "Security best practices",
+            "real-world example",
+            "risk handling"
+          ],
+          "status": "Draft",
+          "approved": false,
+          "active": true,
+          "activeStatus": "Active",
+          "createdBy": "admin",
+          "createdAt": "2026-06-29T13:52:20.598Z",
+          "updatedAt": "2026-06-29T13:52:20.598Z"
+        },
+        {
+          "id": "question-1782740013647-d061b635",
+          "customerProfileId": "customer-profile-1782740046727-a3095843",
+          "technology": "react-native",
+          "normalizedTechnology": "reactnative",
+          "roleLevel": "senior",
+          "text": "How would you validate production readiness for Security best practices?",
+          "type": "Architecture",
+          "category": "Architecture",
+          "difficulty": "Senior",
+          "keyPoints": [
+            "testing",
+            "monitoring",
+            "release readiness"
+          ],
+          "status": "Draft",
+          "approved": false,
+          "active": true,
+          "activeStatus": "Active",
+          "createdBy": "admin",
+          "createdAt": "2026-06-29T13:52:20.598Z",
+          "updatedAt": "2026-06-29T13:52:20.598Z"
+        },
+        {
+          "id": "question-1782740013647-98a6f699",
+          "customerProfileId": "customer-profile-1782740046727-a3095843",
+          "technology": "react-native",
+          "normalizedTechnology": "reactnative",
+          "roleLevel": "senior",
+          "text": "Tell us about a time you handled ambiguity or changing requirements in a customer project.",
+          "type": "Behavioral",
+          "category": "Behavioral",
+          "difficulty": "Senior",
+          "keyPoints": [
+            "communication",
+            "ownership",
+            "adaptability"
+          ],
+          "status": "Draft",
+          "approved": false,
+          "active": true,
+          "activeStatus": "Active",
+          "createdBy": "admin",
+          "createdAt": "2026-06-29T13:52:20.598Z",
+          "updatedAt": "2026-06-29T13:52:20.598Z"
+        },
+        {
+          "id": "question-1782741059196-5c8f8e37",
+          "customerProfileId": "customer-profile-1782740046727-a3095843",
+          "technology": "react-native",
+          "normalizedTechnology": "reactnative",
+          "roleLevel": "senior",
+          "text": "Describe a production issue involving Security best practices and how you would diagnose and resolve it.",
+          "type": "Technical",
+          "category": "Technical",
+          "difficulty": "Senior",
+          "keyPoints": [
+            "Security best practices",
+            "debugging",
+            "root cause analysis"
+          ],
+          "status": "Draft",
+          "approved": false,
+          "active": true,
+          "activeStatus": "Active",
+          "createdBy": "analytics-optimization-agent",
+          "createdAt": "2026-06-29T13:52:20.598Z",
+          "updatedAt": "2026-06-29T13:52:20.598Z"
+        }
+      ],
+      "createdAt": "2026-06-29T13:33:33.647Z",
+      "updatedAt": "2026-06-29T13:52:20.597Z"
+    }
+  ]
+}
