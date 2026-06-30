@@ -2000,6 +2000,49 @@ app.post('/api/interview/complete', async (req, res) => {
   }
 });
 
+// Generate detailed assessment report feedback with server-side OpenAI credentials
+app.post('/api/interview/assessment-evaluation', async (req, res) => {
+  const { evaluationPrompt } = req.body;
+
+  if (!evaluationPrompt || typeof evaluationPrompt !== 'string') {
+    return res.status(400).json({ error: 'evaluationPrompt is required' });
+  }
+
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ error: 'OpenAI API key is not configured on the server' });
+  }
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: process.env.OPENAI_EVALUATION_MODEL || 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a strict, evidence-based technical interview evaluator. Evaluate every numbered answer and return ONLY valid JSON, no other text.'
+        },
+        {
+          role: 'user',
+          content: evaluationPrompt
+        }
+      ],
+      temperature: 0.2,
+      max_tokens: 7000,
+      response_format: { type: 'json_object' }
+    });
+
+    const content = completion.choices?.[0]?.message?.content || '{}';
+    const evaluationResult = JSON.parse(content);
+
+    res.json(evaluationResult);
+  } catch (error) {
+    console.error('Assessment evaluation error:', error);
+    res.status(500).json({
+      error: 'Error evaluating assessment report',
+      details: error.message
+    });
+  }
+});
+
 // Update knowledge base with new insights
 app.post('/api/knowledge/update', async (req, res) => {
   try {

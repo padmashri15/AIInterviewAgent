@@ -438,6 +438,7 @@ export default function InterviewAgent({ data }) {
   const recordingTimeoutRef = useRef(null);
   const recordingActiveRef = useRef(false);
   const sessionTranscriptRef = useRef('');
+  const historyRef = useRef([]);
   const recordingStartRef = useRef(null);
   const existingContentRef = useRef('');
   const assessmentReportRef = useRef(null);
@@ -769,29 +770,29 @@ Return ONLY a valid JSON object with this format (no extra text):
   const getDefaultQuestions = () => {
     const questionsByTech = {
       'swift': [
-        { id: 1, type: 'objective', question: 'What is the difference between a struct and a class in Swift?', context: null, options: ['Structs are reference types, classes are value types', 'Structs are value types, classes are reference types', 'There is no difference', 'Structs cannot have methods'] },
-        { id: 2, type: 'objective', question: 'Which of these is NOT a value type in Swift?', options: ['Array', 'Dictionary', 'Class', 'Set'], context: null },
+        { id: 1, type: 'objective', question: 'What is the difference between a struct and a class in Swift?', context: null, options: ['Structs are reference types, classes are value types', 'Structs are value types, classes are reference types', 'There is no difference', 'Structs cannot have methods'], correctOption: 'B' },
+        { id: 2, type: 'objective', question: 'Which of these is NOT a value type in Swift?', options: ['Array', 'Dictionary', 'Class', 'Set'], context: null, correctOption: 'C' },
         { id: 3, type: 'logical', question: 'How would you optimize memory usage when working with large image collections in a ScrollView?', context: null },
         { id: 4, type: 'theory', question: "Explain Swift's Automatic Reference Counting (ARC) and the problem of strong reference cycles.", context: null },
         { id: 5, type: 'coding', question: 'What is wrong with this code? There is a memory leak. Identify and fix it.', context: '// ERROR: Should use [weak self]\nclass DataManager {\n    var delegate: (() -> Void)?\n    func setupCallback() {\n        delegate = { [unowned self] in\n            self.loadData()\n        }\n    }\n}' }
       ],
       'kotlin': [
-        { id: 1, type: 'objective', question: 'What keyword makes a Kotlin class open for inheritance?', options: ['open', 'extend', 'inherit', 'public'], context: null },
-        { id: 2, type: 'objective', question: 'How does Kotlin handle null safety compared to Java?', options: ['Kotlin requires explicit null safety checks', 'Kotlin doesn\'t support null values', 'Java is safer than Kotlin', 'Kotlin and Java handle nulls the same way'], context: null },
+        { id: 1, type: 'objective', question: 'What keyword makes a Kotlin class open for inheritance?', options: ['open', 'extend', 'inherit', 'public'], context: null, correctOption: 'A' },
+        { id: 2, type: 'objective', question: 'How does Kotlin handle null safety compared to Java?', options: ['Kotlin requires explicit null safety checks', 'Kotlin doesn\'t support null values', 'Java is safer than Kotlin', 'Kotlin and Java handle nulls the same way'], context: null, correctOption: 'A' },
         { id: 3, type: 'logical', question: 'Describe how you would use scope functions (let, apply, run) in real-world scenarios.', context: null },
         { id: 4, type: 'theory', question: 'Explain Kotlin coroutines and their advantages over traditional threading.', context: null },
         { id: 5, type: 'coding', question: 'Identify the null safety issue in this code.', context: '// ERROR: Cannot assign null to non-nullable type\nval name: String = null\nval length = name.length' }
       ],
       'react-native': [
-        { id: 1, type: 'objective', question: 'What is the primary difference between props and state in React Native?', options: ['Props are mutable, state is immutable', 'Props are immutable, state is mutable', 'They are the same thing', 'Props are only for functions'], context: null },
-        { id: 2, type: 'objective', question: 'Which component is used for rendering a scrollable list in React Native?', options: ['FlatList', 'ListView', 'ScrollView', 'List'], context: null },
+        { id: 1, type: 'objective', question: 'What is the primary difference between props and state in React Native?', options: ['Props are mutable, state is immutable', 'Props are immutable, state is mutable', 'They are the same thing', 'Props are only for functions'], context: null, correctOption: 'B' },
+        { id: 2, type: 'objective', question: 'Which component is used for rendering a scrollable list in React Native?', options: ['FlatList', 'ListView', 'ScrollView', 'List'], context: null, correctOption: 'A' },
         { id: 3, type: 'logical', question: 'How would you prevent unnecessary re-renders in a React Native component?', context: null },
         { id: 4, type: 'theory', question: 'Explain how React Native bridges JavaScript and native code.', context: null },
         { id: 5, type: 'coding', question: 'Find the memory leak in this component.', context: 'useEffect(() => {\n    const timer = setInterval(() => {\n        console.log("Tick");\n    }, 1000);\n    // ERROR: Missing cleanup function\n}, []);' }
       ],
       'flutter': [
-        { id: 1, type: 'objective', question: 'What is the base class for all Flutter widgets?', options: ['Widget', 'Element', 'RenderObject', 'State'], context: null },
-        { id: 2, type: 'objective', question: 'Difference between StatelessWidget and StatefulWidget?', options: ['StatelessWidget can\'t change, StatefulWidget can change', 'StatefulWidget can\'t change, StatelessWidget can change', 'There is no difference', 'StatefulWidget is faster'], context: null },
+        { id: 1, type: 'objective', question: 'What is the base class for all Flutter widgets?', options: ['Widget', 'Element', 'RenderObject', 'State'], context: null, correctOption: 'A' },
+        { id: 2, type: 'objective', question: 'Difference between StatelessWidget and StatefulWidget?', options: ['StatelessWidget can\'t change, StatefulWidget can change', 'StatefulWidget can\'t change, StatelessWidget can change', 'There is no difference', 'StatefulWidget is faster'], context: null, correctOption: 'A' },
         { id: 3, type: 'logical', question: 'How would you optimize Flutter app performance for large lists?', context: null },
         { id: 4, type: 'theory', question: 'Explain the Flutter widget tree and rendering pipeline.', context: null },
         { id: 5, type: 'coding', question: 'Identify the bug causing memory leak.', context: 'class _MyWidgetState extends State<MyWidget> {\n    StreamSubscription? subscription;\n    @override\n    void initState() {\n        subscription = stream.listen((data) {});\n        // ERROR: Missing dispose() call\n    }\n}' }
@@ -859,6 +860,7 @@ Return ONLY a valid JSON object with this format (no extra text):
     interviewStartedAtRef.current = new Date().toISOString();
     interviewCompletedAtRef.current = null;
     questionStartedAtRef.current = Date.now();
+    historyRef.current = [];
     setIsInterviewActive(true);
     setInterviewStatus("pending");
     setInterviewProgress(0);
@@ -1244,25 +1246,222 @@ Return ONLY a valid JSON object with this format (no extra text):
     }
   };
 
+  const optionLetters = ['A', 'B', 'C', 'D'];
+
+  const clampScore = (value, fallback = 0) => {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return fallback;
+    return Math.max(0, Math.min(100, Math.round(numericValue)));
+  };
+
+  const averageScore = (scores, fallback = 0) => {
+    const validScores = scores
+      .filter(score => score !== null && score !== undefined && score !== '')
+      .map(score => Number(score))
+      .filter(score => Number.isFinite(score));
+
+    if (!validScores.length) return fallback;
+
+    return clampScore(
+      validScores.reduce((total, score) => total + score, 0) / validScores.length,
+      fallback
+    );
+  };
+
+  const stripOptionPrefix = (value = '') => (
+    String(value || '').trim().replace(/^[A-D][).\s:-]+/i, '').trim()
+  );
+
+  const normalizeComparableText = (value = '') => (
+    stripOptionPrefix(value).toLowerCase().replace(/[^a-z0-9]+/g, '')
+  );
+
+  const getOptionLetterFromValue = (value = '') => {
+    const match = String(value || '').trim().match(/^([A-D])(?:[).\s:-]|$)/i);
+    return match ? match[1].toUpperCase() : '';
+  };
+
+  const getOptionByLetter = (options = [], letter = '') => {
+    const normalizedLetter = String(letter || '').trim().charAt(0).toUpperCase();
+    if (!normalizedLetter || !Array.isArray(options)) return '';
+
+    const directMatch = options.find(option => getOptionLetterFromValue(option) === normalizedLetter);
+    if (directMatch) return directMatch;
+
+    const optionIndex = optionLetters.indexOf(normalizedLetter);
+    return optionIndex >= 0 ? options[optionIndex] || '' : '';
+  };
+
+  const getSelectedOptionLetter = (response = '', options = []) => {
+    const directLetter = getOptionLetterFromValue(response);
+    if (directLetter) return directLetter;
+
+    const normalizedResponse = normalizeComparableText(response);
+    if (!normalizedResponse || !Array.isArray(options)) return '';
+
+    const matchedIndex = options.findIndex(option => {
+      const normalizedOption = normalizeComparableText(option);
+      return normalizedOption && (
+        normalizedResponse === normalizedOption ||
+        normalizedResponse.startsWith(normalizedOption) ||
+        normalizedResponse.includes(normalizedOption)
+      );
+    });
+
+    return matchedIndex >= 0 ? optionLetters[matchedIndex] : '';
+  };
+
+  const getQuestionExpectedAnswer = (question = {}) => {
+    const correctOption = String(
+      question.correctOption ||
+      question.correctAnswerOption ||
+      ''
+    ).trim().charAt(0).toUpperCase();
+
+    if (correctOption) {
+      const optionText = getOptionByLetter(question.options, correctOption);
+      return optionText
+        ? `${correctOption}. ${stripOptionPrefix(optionText)}`
+        : correctOption;
+    }
+
+    if (question.expectedAnswer) return question.expectedAnswer;
+    if (question.expectedOutput) return `Expected output: ${JSON.stringify(question.expectedOutput)}`;
+    if (question.context) return question.context;
+    if (question.notes) return question.notes;
+    return '';
+  };
+
+  const normalizeAssessmentLabel = (assessment = '', score = null) => {
+    const normalizedAssessment = String(assessment || '').toLowerCase();
+
+    if (
+      normalizedAssessment.includes('incorrect') ||
+      normalizedAssessment.includes('not correct') ||
+      normalizedAssessment.includes('wrong')
+    ) {
+      return 'Incorrect';
+    }
+
+    if (
+      normalizedAssessment.includes('partial') ||
+      normalizedAssessment.includes('partially')
+    ) {
+      return 'Partially Correct';
+    }
+
+    if (
+      normalizedAssessment.includes('correct') ||
+      normalizedAssessment.includes('right')
+    ) {
+      return 'Correct';
+    }
+
+    if (normalizedAssessment.includes('review')) return 'Needs Review';
+
+    const numericScore = Number(score);
+    if (Number.isFinite(numericScore)) {
+      if (numericScore >= 85) return 'Correct';
+      if (numericScore >= 45) return 'Partially Correct';
+      return 'Incorrect';
+    }
+
+    return 'Needs Review';
+  };
+
+  const getAssessmentScoreEstimate = (assessment = '', explicitScore = null) => {
+    const numericScore = Number(explicitScore);
+    if (Number.isFinite(numericScore)) return clampScore(numericScore);
+
+    const normalizedAssessment = String(assessment || '').toLowerCase();
+    if (
+      normalizedAssessment.includes('incorrect') ||
+      normalizedAssessment.includes('not correct') ||
+      normalizedAssessment.includes('wrong')
+    ) {
+      return 0;
+    }
+    if (normalizedAssessment.includes('partial')) return 50;
+    if (normalizedAssessment.includes('correct') || normalizedAssessment.includes('right')) return 100;
+    return 0;
+  };
+
+  const evaluateObjectiveAnswerLocally = (historyItem = {}) => {
+    const correctOption = String(historyItem.correctOption || '').trim().charAt(0).toUpperCase();
+    if (!correctOption) return null;
+
+    const selectedOption = getSelectedOptionLetter(historyItem.response, historyItem.options);
+    const correctOptionText = getOptionByLetter(historyItem.options, correctOption);
+    const expectedAnswer = correctOptionText
+      ? `${correctOption}. ${stripOptionPrefix(correctOptionText)}`
+      : correctOption;
+    const selectedMatchesCorrect = selectedOption === correctOption;
+
+    return {
+      assessment: selectedMatchesCorrect ? 'Correct' : 'Incorrect',
+      score: selectedMatchesCorrect ? 100 : 0,
+      expectedAnswer,
+      feedback: selectedMatchesCorrect
+        ? `The selected option matches the correct answer (${expectedAnswer}). The response is technically correct for this objective question.`
+        : `The selected answer does not match the correct option. Correct answer: ${expectedAnswer}. Review the underlying concept before using this topic in a project or customer interview.`
+    };
+  };
+
+  const getQuestionTypeLabel = (questionType = '') => (
+    String(questionType || 'technical').replace(/[-_]+/g, ' ')
+  );
+
+  const buildHistoryItem = (question = {}, questionIndex = 0, response = '', responseDurationSeconds = 0) => ({
+    questionId: question.id || `question-${questionIndex + 1}`,
+    question: question.question || currentQuestion || `Question ${questionIndex + 1}`,
+    response,
+    questionType: question.type || 'technical',
+    context: question.context || '',
+    options: Array.isArray(question.options) ? question.options : [],
+    correctOption: question.correctOption || question.correctAnswerOption || '',
+    expectedAnswer: getQuestionExpectedAnswer(question),
+    sampleInput: question.sampleInput,
+    expectedOutput: question.expectedOutput,
+    notes: question.notes || '',
+    language: question.language || '',
+    responseDurationSeconds
+  });
+
+  const getCompleteInterviewHistory = () => {
+    const capturedHistory = historyRef.current.length ? historyRef.current : history;
+
+    return questions.map((question, index) => {
+      const existingHistoryItem = capturedHistory[index] || {};
+      return {
+        ...buildHistoryItem(question, index, existingHistoryItem.response || '', existingHistoryItem.responseDurationSeconds || 0),
+        ...existingHistoryItem,
+        question: existingHistoryItem.question || question.question || `Question ${index + 1}`,
+        response: existingHistoryItem.response || 'No response submitted',
+        options: existingHistoryItem.options?.length ? existingHistoryItem.options : (Array.isArray(question.options) ? question.options : []),
+        correctOption: existingHistoryItem.correctOption || question.correctOption || question.correctAnswerOption || '',
+        expectedAnswer: existingHistoryItem.expectedAnswer || getQuestionExpectedAnswer(question)
+      };
+    });
+  };
+
   const evaluateResponse = (response) => {
     const question = questions[interviewProgress] || {};
     const responseDurationSeconds = questionStartedAtRef.current
       ? Math.max(0, Math.round((Date.now() - questionStartedAtRef.current) / 1000))
       : 0;
+    const historyItem = buildHistoryItem(question, interviewProgress, response, responseDurationSeconds);
 
     // Store response without showing per-question feedback
-    setHistory(prev => [...prev, {
-      questionId: question.id || `question-${interviewProgress + 1}`,
-      question: currentQuestion,
-      response,
-      questionType: question.type,
-      responseDurationSeconds
-    }]);
+    setHistory(prev => {
+      const updatedHistory = [...prev, historyItem];
+      historyRef.current = updatedHistory;
+      return updatedHistory;
+    });
 
     trackEvent('question_answered', {
-      question_id: question.id || `question-${interviewProgress + 1}`,
-      question_text: currentQuestion,
-      question_type: question.type || 'unknown',
+      question_id: historyItem.questionId,
+      question_text: historyItem.question,
+      question_type: historyItem.questionType || 'unknown',
       technology: data?.technology || data?.domain || 'unknown',
       role: data?.role || data?.roleLevel || 'unknown',
       customer_profile_id: data?.customerProjectProfile?.id || '',
@@ -1278,14 +1477,6 @@ Return ONLY a valid JSON object with this format (no extra text):
       setUserResponse("");
       setFeedback(null);
     }, 800);
-  };
-
-  const getAssessmentScoreEstimate = (assessment = '') => {
-    const normalizedAssessment = String(assessment || '').toLowerCase();
-    if (normalizedAssessment.includes('partial')) return 60;
-    if (normalizedAssessment.includes('correct')) return 100;
-    if (normalizedAssessment.includes('incorrect')) return 25;
-    return 0;
   };
 
   const getDurationSecondsFromFeedback = (overallFeedback) => {
@@ -1315,7 +1506,7 @@ Return ONLY a valid JSON object with this format (no extra text):
       communication: overallFeedback?.communication || 0,
       hiring_recommendation: overallFeedback?.hiringRecommendation || '',
       duration_seconds: durationSeconds,
-      answer_count: history.length,
+      answer_count: answerEvaluations.length || history.length,
       question_count: questions.length
     });
 
@@ -1324,10 +1515,10 @@ Return ONLY a valid JSON object with this format (no extra text):
       const question = questions[index] || {};
       trackEvent('question_evaluated', {
         question_id: historyItem.questionId || question.id || `question-${index + 1}`,
-        question_text: historyItem.question || question.question || `Question ${index + 1}`,
-        question_type: historyItem.questionType || question.type || 'unknown',
+        question_text: answer.question || historyItem.question || question.question || `Question ${index + 1}`,
+        question_type: answer.questionType || historyItem.questionType || question.type || 'unknown',
         assessment: answer.assessment || '',
-        score_estimate: getAssessmentScoreEstimate(answer.assessment),
+        score_estimate: getAssessmentScoreEstimate(answer.assessment, answer.score),
         technology: data?.technology || data?.domain || 'unknown',
         role: data?.role || data?.roleLevel || 'unknown',
         customer_profile_id: data?.customerProjectProfile?.id || '',
@@ -1338,14 +1529,230 @@ Return ONLY a valid JSON object with this format (no extra text):
     });
   };
 
+  const toTextArray = (value, fallback = []) => {
+    if (Array.isArray(value)) {
+      return value.map(item => String(item || '').trim()).filter(Boolean);
+    }
+
+    if (typeof value === 'string' && value.trim()) {
+      return value
+        .split(/\n|;|\u2022/g)
+        .map(item => item.trim())
+        .filter(Boolean);
+    }
+
+    return fallback;
+  };
+
+  const shortenText = (value = '', maxLength = 180) => {
+    const text = String(value || '').replace(/\s+/g, ' ').trim();
+    if (text.length <= maxLength) return text;
+    return `${text.slice(0, maxLength - 3)}...`;
+  };
+
+  const buildFallbackAnswerFeedback = (historyItem, assessment, expectedAnswer, localObjectiveEvaluation) => {
+    if (localObjectiveEvaluation?.feedback) return localObjectiveEvaluation.feedback;
+
+    const candidateAnswer = String(historyItem.response || '').trim();
+    if (!candidateAnswer || candidateAnswer === 'No response submitted') {
+      return 'No answer was submitted for this question, so the response is marked incorrect. The candidate should revisit the topic and prepare a structured answer with technical facts, tradeoffs, and a practical example.';
+    }
+
+    const expectedText = expectedAnswer
+      ? `Expected answer or rubric: ${shortenText(expectedAnswer, 260)}.`
+      : 'No stored answer key was available for this question.';
+
+    if (assessment === 'Needs Review') {
+      return `The answer has been captured, but automatic AI validation was unavailable or incomplete for this descriptive question. ${expectedText} A reviewer should compare the response against the rubric and check for correctness, depth, examples, and missing edge cases.`;
+    }
+
+    return `${expectedText} The candidate's answer should be checked for technical correctness, completeness, and practical relevance.`;
+  };
+
+  const buildCompleteAnswerEvaluations = (rawAnswers = [], sourceHistory = getCompleteInterviewHistory()) => {
+    const answersByNumber = new Map(
+      (Array.isArray(rawAnswers) ? rawAnswers : []).map((answer, index) => [
+        Number(answer?.questionNumber) || index + 1,
+        answer || {}
+      ])
+    );
+
+    return sourceHistory.map((historyItem, index) => {
+      const questionNumber = index + 1;
+      const aiAnswer = answersByNumber.get(questionNumber) || {};
+      const localObjectiveEvaluation = String(historyItem.questionType || '').toLowerCase() === 'objective'
+        ? evaluateObjectiveAnswerLocally(historyItem)
+        : null;
+      const explicitScore = aiAnswer.score ?? aiAnswer.marks ?? aiAnswer.percentage;
+      const hasAiAssessment = Boolean(aiAnswer.assessment || explicitScore !== undefined);
+      const score = localObjectiveEvaluation
+        ? localObjectiveEvaluation.score
+        : hasAiAssessment
+          ? getAssessmentScoreEstimate(aiAnswer.assessment, explicitScore)
+          : null;
+      const assessment = localObjectiveEvaluation
+        ? localObjectiveEvaluation.assessment
+        : hasAiAssessment
+          ? normalizeAssessmentLabel(aiAnswer.assessment, score)
+          : 'Needs Review';
+      const expectedAnswer = localObjectiveEvaluation?.expectedAnswer ||
+        aiAnswer.expectedAnswer ||
+        aiAnswer.correctAnswer ||
+        historyItem.expectedAnswer ||
+        '';
+      const missingConcepts = toTextArray(
+        aiAnswer.missingConcepts || aiAnswer.missedConcepts || aiAnswer.gaps,
+        assessment === 'Correct' ? [] : ['Add more precise technical detail', 'Include a practical example or edge case']
+      );
+      const improvementSuggestion = String(
+        aiAnswer.improvementSuggestion ||
+        aiAnswer.suggestion ||
+        aiAnswer.recommendation ||
+        ''
+      ).trim();
+      const feedbackText = String(aiAnswer.feedback || aiAnswer.analysis || '').trim() ||
+        buildFallbackAnswerFeedback(historyItem, assessment, expectedAnswer, localObjectiveEvaluation);
+
+      return {
+        questionNumber,
+        question: historyItem.question || aiAnswer.question || `Question ${questionNumber}`,
+        questionType: historyItem.questionType || aiAnswer.questionType || 'technical',
+        candidateAnswer: historyItem.response || aiAnswer.candidateAnswer || 'No response submitted',
+        assessment,
+        score,
+        expectedAnswer,
+        feedback: feedbackText,
+        missingConcepts,
+        improvementSuggestion: improvementSuggestion ||
+          (assessment === 'Correct'
+            ? 'Keep using the same level of clarity and evidence in future answers.'
+            : 'Rewrite the answer with the main concept first, then add implementation details, tradeoffs, and a concise example.'),
+        responseDurationSeconds: historyItem.responseDurationSeconds || 0
+      };
+    });
+  };
+
+  const calculateAccuracyFromAnswers = (answerEvaluations, fallbackAccuracy = 0) => {
+    const scorableAnswers = answerEvaluations.filter(answer => answer.assessment !== 'Needs Review');
+    if (!scorableAnswers.length && answerEvaluations.length) return 0;
+
+    return averageScore(
+      scorableAnswers.map(answer => answer.score),
+      clampScore(fallbackAccuracy, 0)
+    );
+  };
+
+  const estimateCommunicationFromHistory = (sourceHistory = []) => {
+    const responses = sourceHistory
+      .map(item => String(item.response || '').trim())
+      .filter(response => response && response !== 'No response submitted');
+    if (!responses.length) return 0;
+
+    const averageWords = responses.reduce((total, response) => (
+      total + response.split(/\s+/).filter(Boolean).length
+    ), 0) / responses.length;
+
+    return clampScore(Math.min(85, 35 + averageWords * 1.4), 0);
+  };
+
+  const estimateConfidenceFromHistory = (sourceHistory = []) => {
+    const answeredCount = sourceHistory.filter(item => {
+      const response = String(item.response || '').trim();
+      return response && response !== 'No response submitted';
+    }).length;
+
+    if (!sourceHistory.length || !answeredCount) return 0;
+    return clampScore(45 + (answeredCount / sourceHistory.length) * 40, 0);
+  };
+
+  const buildFinalFeedback = (evaluation = {}, sourceHistory = getCompleteInterviewHistory(), options = {}) => {
+    const answerEvaluations = buildCompleteAnswerEvaluations(evaluation.answers, sourceHistory);
+    const accuracyScore = calculateAccuracyFromAnswers(answerEvaluations, evaluation.accuracy);
+    const confidenceScore = clampScore(evaluation.confidence, estimateConfidenceFromHistory(sourceHistory));
+    const communicationScore = clampScore(evaluation.communication, estimateCommunicationFromHistory(sourceHistory));
+    const overallScore = accuracyScore;
+    const passed = overallScore >= 70;
+    const level = getDreyfusLevel(overallScore);
+    const completedAt = options.completedAt || new Date();
+    const reviewRequired = answerEvaluations.some(answer => answer.assessment === 'Needs Review');
+    const fallbackNotice = options.fallbackReason
+      ? `AI evaluation was unavailable or incomplete (${options.fallbackReason}). Objective questions were scored using their answer keys, and descriptive answers are included for manual review. `
+      : '';
+
+    return {
+      score: overallScore,
+      accuracy: accuracyScore,
+      confidence: confidenceScore,
+      communication: communicationScore,
+      feedback: evaluation.overallAssessment ||
+        `${fallbackNotice}The candidate completed ${answerEvaluations.length} questions. Final marks are based on validated technical correctness, while confidence and communication are shown as supporting signals.`,
+      strengths: toTextArray(evaluation.strengths, [
+        'Completed the interview flow',
+        'Provided responses for the captured questions',
+        'Demonstrated areas that can now be reviewed question by question'
+      ]),
+      areasToImprove: toTextArray(evaluation.areasToImprove, [
+        'Increase answer depth with implementation details',
+        'Use examples, tradeoffs, and edge cases',
+        'Keep responses structured around the exact question asked'
+      ]),
+      technicalFeedback: evaluation.technicalFeedback ||
+        `${fallbackNotice}Technical correctness is calculated from the detailed question evaluations below. Review each answer for exact concepts, missed points, and expected rubric alignment.`,
+      communicationFeedback: evaluation.communicationFeedback ||
+        `Communication was estimated from answer completeness and clarity. Strong answers should define the concept, explain why it matters, and finish with a practical example.`,
+      behavioralFeedback: evaluation.behavioralFeedback ||
+        `Professional readiness should be assessed from consistency, focus, and interview discipline. Tab switches: ${leaveCount}. Time outside: ${totalTimeOutside} seconds.`,
+      overallRating: evaluation.overallRating || level,
+      recommendations: evaluation.recommendations ||
+        'Review every incorrect or partially correct answer, rewrite it with the expected concept and a practical example, then repeat a timed mock interview.',
+      hiringRecommendation: evaluation.hiringRecommendation || getHiringRecommendation(overallScore),
+      answers: answerEvaluations,
+      level,
+      assessmentStatus: reviewRequired
+        ? 'Completed - Review Required'
+        : passed ? 'Completed - Passed' : 'Completed - Needs Improvement',
+      completedAt: completedAt.toISOString(),
+      interviewDuration: getInterviewDuration(completedAt)
+    };
+  };
+
   const evaluateOverallInterview = async () => {
     console.log('🔴 Starting OpenAI validation of answers...');
+    const interviewHistory = getCompleteInterviewHistory();
     
     try {
       // Build evaluation prompt with all Q&A pairs
-      const qaString = history.map((item, idx) => 
-        `Q${idx + 1}: ${item.question}\nCandidate's Answer: ${item.response}`
-      ).join('\n\n---\n\n');
+      const qaString = interviewHistory.map((item, idx) => {
+        const optionLines = item.options?.length
+          ? `Options:\n${item.options.map((option, optionIndex) => `${optionLetters[optionIndex] || ''}. ${stripOptionPrefix(option)}`).join('\n')}`
+          : '';
+        const correctOptionLine = item.correctOption
+          ? `Correct option for objective scoring: ${item.correctOption}`
+          : '';
+        const expectedAnswerLine = item.expectedAnswer
+          ? `Expected answer or rubric: ${item.expectedAnswer}`
+          : '';
+        const contextLine = item.context
+          ? `Question context/code/rubric:\n${item.context}`
+          : '';
+        const sampleInputLine = item.sampleInput
+          ? `Sample input: ${JSON.stringify(item.sampleInput)}`
+          : '';
+        const expectedOutputLine = item.expectedOutput
+          ? `Expected output: ${JSON.stringify(item.expectedOutput)}`
+          : '';
+
+        return [
+          `Q${idx + 1} [${getQuestionTypeLabel(item.questionType)}]: ${item.question}`,
+          optionLines,
+          correctOptionLine,
+          expectedAnswerLine,
+          contextLine,
+          sampleInputLine,
+          expectedOutputLine,
+          `Candidate's Answer: ${item.response || 'No response submitted'}`
+        ].filter(Boolean).join('\n');
+      }).join('\n\n---\n\n');
       const analyticsOptimization = await fetchAnalyticsOptimizationInsights();
       const analyticsAssessmentContext = analyticsOptimization?.promptContext
         ? `\n\nAdmin-approved analytics feedback to include in this assessment:\n${analyticsOptimization.promptContext}`
@@ -1360,17 +1767,18 @@ Evaluate these interview responses:
 ${qaString}
 
 Provide a detailed JSON evaluation with:
-1. Overall accuracy score (0-100) - How correct/complete are the answers?
-   for example someone scored 0 correct answer then the over all scrore must be 0. if they answered all the questions correctly then the score must be 100. based on no of righjt questions it should calculate the % and show the score.
-2. Confidence score (0-100) - Does the candidate speak with conviction and technical depth?
-3. Communication score (0-100) - How clearly are ideas explained?
-4. For each answer: A correctness assessment and specific feedback
-5. Detailed strengths (3-5 key strengths observed)
-6. Detailed areas for improvement (3-5 key areas)
-7. Overall assessment and recommendations
-8. Validate all text responses for technical 
-9. Detailed technical, communication, and behavioral feedback
-10. Hiring recommendation using only: Hire, Consider, Reject
+1. Exactly ${interviewHistory.length} answer evaluations, one for every numbered question above.
+2. Per-answer score from 0-100. Use 100 for correct, 50 for partially correct, and 0 for incorrect unless the answer deserves a more precise technical score.
+3. For objective questions with a correct option, mark the answer correct only when the selected option matches the correct option.
+4. Overall accuracy score (0-100) equal to the average of all per-answer scores. If every answer is wrong, accuracy must be 0. If every answer is correct, accuracy must be 100.
+5. Confidence score (0-100) based on technical depth, conviction, and specificity.
+6. Communication score (0-100) based on clarity, structure, and concision.
+7. Detailed technical, communication, and behavioral feedback with concrete evidence from the candidate's answers.
+8. Detailed strengths (3-5 key strengths observed) and detailed areas for improvement (3-5 key areas).
+9. Overall assessment and recommendations that are specific to this candidate's responses.
+10. Hiring recommendation using only: Hire, Consider, Reject.
+
+For each answer, include the question text, candidate answer, expected answer/rubric, missed concepts, and an improvement suggestion. Feedback must be specific enough that a reviewer can understand why the answer received the score.
 
 
 Return ONLY valid JSON in this format:
@@ -1381,139 +1789,61 @@ Return ONLY valid JSON in this format:
   "answers": [
     {
       "questionNumber": 1,
+      "question": "question text",
+      "candidateAnswer": "candidate answer",
       "assessment": "Correct/Partially Correct/Incorrect",
-      "feedback": "Specific feedback on this answer..."
+      "score": 100,
+      "expectedAnswer": "expected answer or rubric",
+      "feedback": "Specific 3-5 sentence feedback on this answer...",
+      "missingConcepts": ["missed concept 1", "missed concept 2"],
+      "improvementSuggestion": "Specific way to improve this answer"
     }
   ],
   "strengths": ["Strength 1", "Strength 2", "Strength 3", "Strength 4", "Strength 5"],
   "areasToImprove": ["Area 1", "Area 2", "Area 3", "Area 4", "Area 5"],
-  "technicalFeedback": "Detailed technical feedback paragraph",
-  "communicationFeedback": "Detailed communication feedback paragraph",
-  "behavioralFeedback": "Detailed behavioral/professional feedback paragraph",
+  "technicalFeedback": "Detailed technical feedback paragraph with evidence",
+  "communicationFeedback": "Detailed communication feedback paragraph with evidence",
+  "behavioralFeedback": "Detailed behavioral/professional feedback paragraph with evidence",
   "overallRating": "Expert/Proficient/Competent/Advanced Beginner/Novice",
-  "overallAssessment": "Detailed paragraph about overall performance",
-  "recommendations": "Career and learning recommendations",
+  "overallAssessment": "Detailed paragraph about overall performance with evidence",
+  "recommendations": "Detailed career and learning recommendations",
   "hiringRecommendation": "Hire/Consider/Reject"
 }`;
 
-      console.log('🟢 Sending evaluation request to OpenAI...');
+      console.log('🟢 Sending assessment evaluation request to backend...');
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch(`${apiBaseUrl}/api/interview/assessment-evaluation`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY || ''}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert technical interviewer. Evaluate the candidate responses and return ONLY valid JSON, no other text.'
-            },
-            {
-              role: 'user',
-              content: evaluationPrompt
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 4000
+          evaluationPrompt
         })
       });
 
-      if (!response.ok) {
-        throw new Error('OpenAI API error');
-      }
-
-      const result = await readJsonResponse(response, 'OpenAI evaluation response was not JSON');
-      const content = result.choices[0].message.content;
-      console.log('✅ Evaluation received:', content);
-
-      // Extract JSON from response
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const evaluation = JSON.parse(jsonMatch[0]);
-        
-        // Calculate overall score
-        const overallScore = Math.round(
-          (evaluation.accuracy * 0.70 + evaluation.confidence * 0.70 + evaluation.communication * 0.60) / 2
-        );
-
-        const passed = overallScore >= 70;
-        setInterviewStatus(passed ? "passed" : "failed");
-        const level = getDreyfusLevel(overallScore);
-        const completedAt = new Date();
-        interviewCompletedAtRef.current = completedAt.toISOString();
-
-        const overallFeedback = {
-          score: overallScore,
-          accuracy: evaluation.accuracy,
-          confidence: evaluation.confidence,
-          communication: evaluation.communication,
-          feedback: evaluation.overallAssessment,
-          strengths: evaluation.strengths,
-          areasToImprove: evaluation.areasToImprove,
-          technicalFeedback: evaluation.technicalFeedback,
-          communicationFeedback: evaluation.communicationFeedback,
-          behavioralFeedback: evaluation.behavioralFeedback,
-          overallRating: evaluation.overallRating || level,
-          recommendations: evaluation.recommendations,
-          hiringRecommendation: evaluation.hiringRecommendation || getHiringRecommendation(overallScore),
-          answers: evaluation.answers
-          ,
-          level,
-          assessmentStatus: passed ? 'Completed - Passed' : 'Completed - Needs Improvement',
-          completedAt: completedAt.toISOString(),
-          interviewDuration: getInterviewDuration(completedAt)
-        };
-
-        console.log('✅ Feedback set:', overallFeedback);
-        setFeedback(overallFeedback);
-        trackInterviewCompletionAnalytics(overallFeedback);
-        return;
-      }
-
-      throw new Error('Invalid response format');
-    } catch (error) {
-      console.error('❌ Evaluation error:', error);
-      
-      // Fallback to basic scoring
-      const accuracyScore = Math.floor(Math.random() * 40 + 60);
-      const confidenceScore = Math.floor(Math.random() * 40 + 60);
-      const communicationScore = Math.floor(Math.random() * 40 + 60);
-
-      const overallScore = Math.round(
-        (accuracyScore * 0.70 + confidenceScore * 0.70 + communicationScore * 0.60) / 2
-      );
-
-      const passed = overallScore >= 70;
-      setInterviewStatus(passed ? "passed" : "failed");
-      const level = getDreyfusLevel(overallScore);
+      const evaluation = await readJsonResponse(response, 'Assessment evaluation response was not JSON');
+      console.log('✅ Evaluation received:', evaluation);
       const completedAt = new Date();
       interviewCompletedAtRef.current = completedAt.toISOString();
+      const overallFeedback = buildFinalFeedback(evaluation, interviewHistory, { completedAt });
+      const passed = overallFeedback.score >= 70 && overallFeedback.assessmentStatus !== 'Completed - Review Required';
+      setInterviewStatus(passed ? "passed" : "failed");
 
-      const overallFeedback = {
-        score: overallScore,
-        accuracy: accuracyScore,
-        confidence: confidenceScore,
-        communication: communicationScore,
-        feedback: passed
-          ? `Good performance! You showed strong knowledge with ${accuracyScore}% accuracy, ${confidenceScore}% confidence, and ${communicationScore}% communication skills.`
-          : `Good effort! Work on improving your accuracy (${accuracyScore}%), confidence (${confidenceScore}%), and communication (${communicationScore}%) skills.`,
-        strengths: ["Technical knowledge", "Clear thinking", "Problem-solving"],
-        areasToImprove: ["Technical depth", "Confidence", "Communication"],
-        technicalFeedback: `Technical accuracy score: ${accuracyScore}%. Continue strengthening topic depth and practical examples.`,
-        communicationFeedback: `Communication score: ${communicationScore}%. Keep answers structured, concise, and example driven.`,
-        behavioralFeedback: `Confidence score: ${confidenceScore}%. Continue improving clarity, conviction, and professional interview presence.`,
-        overallRating: level,
-        recommendations: "Continue practicing and building your technical expertise.",
-        hiringRecommendation: getHiringRecommendation(overallScore),
-        answers: [],
-        level,
-        assessmentStatus: passed ? 'Completed - Passed' : 'Completed - Needs Improvement',
-        completedAt: completedAt.toISOString(),
-        interviewDuration: getInterviewDuration(completedAt)
-      };
+      console.log('✅ Feedback set:', overallFeedback);
+      setFeedback(overallFeedback);
+      trackInterviewCompletionAnalytics(overallFeedback);
+      return;
+    } catch (error) {
+      console.error('❌ Evaluation error:', error);
+      const completedAt = new Date();
+      interviewCompletedAtRef.current = completedAt.toISOString();
+      const overallFeedback = buildFinalFeedback({}, interviewHistory, {
+        completedAt,
+        fallbackReason: error.message
+      });
+      const passed = overallFeedback.score >= 70 && overallFeedback.assessmentStatus !== 'Completed - Review Required';
+      setInterviewStatus(passed ? "passed" : "failed");
 
       setFeedback(overallFeedback);
       trackInterviewCompletionAnalytics(overallFeedback);
@@ -1527,6 +1857,7 @@ Return ONLY valid JSON in this format:
     setCurrentQuestion("");
     setUserResponse("");
     setFeedback(null);
+    historyRef.current = [];
     setHistory([]);
     setExcelMessage(null);
   };
@@ -1582,10 +1913,46 @@ Return ONLY valid JSON in this format:
     return answers.map((answer, index) => {
       const questionNumber = answer.questionNumber || index + 1;
       const assessment = answer.assessment || 'Not assessed';
+      const scoreText = answer.score === null || answer.score === undefined ? 'Needs review' : `${answer.score}%`;
       const answerFeedback = answer.feedback || 'No feedback provided';
+      const missingConcepts = formatListForExcel(answer.missingConcepts, 'None listed');
 
-      return `Question ${questionNumber}: ${assessment}\n${answerFeedback}`;
+      return [
+        `Question ${questionNumber}: ${answer.question || 'Question text not available'}`,
+        `Candidate Answer: ${answer.candidateAnswer || 'No response submitted'}`,
+        `Assessment: ${assessment} (${scoreText})`,
+        answer.expectedAnswer ? `Expected Answer / Rubric: ${answer.expectedAnswer}` : '',
+        `Feedback: ${answerFeedback}`,
+        `Missing Concepts: ${missingConcepts}`,
+        answer.improvementSuggestion ? `Improvement Suggestion: ${answer.improvementSuggestion}` : ''
+      ].filter(Boolean).join('\n');
     }).join('\n\n');
+  };
+
+  const getAssessmentStyles = (assessment = '') => {
+    const label = normalizeAssessmentLabel(assessment);
+    if (label === 'Correct') {
+      return {
+        panel: 'border-green-500 bg-green-50',
+        badge: 'bg-green-200 text-green-800'
+      };
+    }
+    if (label === 'Partially Correct') {
+      return {
+        panel: 'border-yellow-500 bg-yellow-50',
+        badge: 'bg-yellow-200 text-yellow-800'
+      };
+    }
+    if (label === 'Needs Review') {
+      return {
+        panel: 'border-blue-500 bg-blue-50',
+        badge: 'bg-blue-200 text-blue-800'
+      };
+    }
+    return {
+      panel: 'border-red-500 bg-red-50',
+      badge: 'bg-red-200 text-red-800'
+    };
   };
 
   const getAssessmentStatus = () => {
@@ -2245,7 +2612,7 @@ Return ONLY valid JSON in this format:
                   <div className="text-center p-4 bg-blue-50 rounded-xl">
                     <div className="text-4xl font-bold text-blue-600 mb-2">{feedback.accuracy}%</div>
                     <div className="text-gray-700 font-semibold mb-3">Accuracy</div>
-                    <div className="text-xs text-gray-600">Weight: 70%</div>
+                    <div className="text-xs text-gray-600">Primary final marks</div>
                     <div className="w-full bg-gray-300 rounded-full h-2 mt-3 overflow-hidden">
                       <div
                         className="h-full bg-blue-500"
@@ -2258,7 +2625,7 @@ Return ONLY valid JSON in this format:
                   <div className="text-center p-4 bg-purple-50 rounded-xl">
                     <div className="text-4xl font-bold text-purple-600 mb-2">{feedback.confidence}%</div>
                     <div className="text-gray-700 font-semibold mb-3">Confidence</div>
-                    <div className="text-xs text-gray-600">Weight: 70%</div>
+                    <div className="text-xs text-gray-600">Supporting signal</div>
                     <div className="w-full bg-gray-300 rounded-full h-2 mt-3 overflow-hidden">
                       <div
                         className="h-full bg-purple-500"
@@ -2272,7 +2639,7 @@ Return ONLY valid JSON in this format:
                 <div className="text-center p-4 bg-emerald-50 rounded-xl">
                   <div className="text-4xl font-bold text-emerald-600 mb-2">{feedback.communication}%</div>
                   <div className="text-gray-700 font-semibold mb-3">Communication</div>
-                  <div className="text-xs text-gray-600">Weight: 60%</div>
+                  <div className="text-xs text-gray-600">Supporting signal</div>
                   <div className="w-full bg-gray-300 rounded-full h-2 mt-3 overflow-hidden">
                     <div
                       className="h-full bg-emerald-500"
@@ -2288,6 +2655,22 @@ Return ONLY valid JSON in this format:
                 <p className="text-gray-700 leading-relaxed text-lg">
                   {feedback.feedback || 'Your interview performance has been assessed across multiple dimensions. Your responses demonstrate your current skill level and areas for professional development.'}
                 </p>
+              </div>
+
+              {/* Detailed Feedback */}
+              <div className="grid md:grid-cols-3 gap-6 mb-6">
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
+                  <h3 className="text-lg font-bold text-blue-800 mb-3">Technical Feedback</h3>
+                  <p className="text-gray-700 leading-relaxed text-sm">{feedback.technicalFeedback}</p>
+                </div>
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-emerald-100">
+                  <h3 className="text-lg font-bold text-emerald-800 mb-3">Communication Feedback</h3>
+                  <p className="text-gray-700 leading-relaxed text-sm">{feedback.communicationFeedback}</p>
+                </div>
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-purple-100">
+                  <h3 className="text-lg font-bold text-purple-800 mb-3">Behavioral Feedback</h3>
+                  <p className="text-gray-700 leading-relaxed text-sm">{feedback.behavioralFeedback}</p>
+                </div>
               </div>
 
               {/* Strengths and Growth Areas */}
@@ -2330,36 +2713,71 @@ Return ONLY valid JSON in this format:
                 <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-6">Detailed Question Analysis</h3>
                   <div className="space-y-4">
-                    {feedback.answers.map((answer, idx) => (
-                      <div
-                        key={idx}
-                        className={`p-5 rounded-lg border-l-4 ${
-                          answer.assessment === 'Correct'
-                            ? 'border-green-500 bg-green-50'
-                            : answer.assessment === 'Partially Correct'
-                            ? 'border-yellow-500 bg-yellow-50'
-                            : 'border-red-500 bg-red-50'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <span className="font-bold text-gray-900">Question {answer.questionNumber}</span>
+                    {feedback.answers.map((answer, idx) => {
+                      const styles = getAssessmentStyles(answer.assessment);
+                      const scoreText = answer.score === null || answer.score === undefined ? 'Needs review' : `${answer.score}%`;
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`p-5 rounded-lg border-l-4 ${styles.panel}`}
+                        >
+                          <div className="flex items-start justify-between gap-4 mb-3">
+                            <div>
+                              <span className="font-bold text-gray-900">Question {answer.questionNumber}</span>
+                              <span className="ml-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                {getQuestionTypeLabel(answer.questionType)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap justify-end">
+                              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white text-gray-700 border border-gray-200">
+                                Score: {scoreText}
+                              </span>
+                              <span className={`px-3 py-1 rounded-full text-xs font-bold ${styles.badge}`}>
+                                {answer.assessment}
+                              </span>
+                            </div>
                           </div>
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-bold ${
-                              answer.assessment === 'Correct'
-                                ? 'bg-green-200 text-green-800'
-                                : answer.assessment === 'Partially Correct'
-                                ? 'bg-yellow-200 text-yellow-800'
-                                : 'bg-red-200 text-red-800'
-                            }`}
-                          >
-                            {answer.assessment}
-                          </span>
+
+                          <div className="space-y-3 text-sm">
+                            <div>
+                              <p className="font-semibold text-gray-900 mb-1">Question</p>
+                              <p className="text-gray-700 whitespace-pre-wrap">{answer.question}</p>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900 mb-1">Candidate Answer</p>
+                              <p className="text-gray-700 whitespace-pre-wrap">{answer.candidateAnswer || 'No response submitted'}</p>
+                            </div>
+                            {answer.expectedAnswer && (
+                              <div>
+                                <p className="font-semibold text-gray-900 mb-1">Expected Answer / Rubric</p>
+                                <p className="text-gray-700 whitespace-pre-wrap">{answer.expectedAnswer}</p>
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-semibold text-gray-900 mb-1">Feedback</p>
+                              <p className="text-gray-700 whitespace-pre-wrap">{answer.feedback}</p>
+                            </div>
+                            {answer.missingConcepts && answer.missingConcepts.length > 0 && (
+                              <div>
+                                <p className="font-semibold text-gray-900 mb-1">Missing Concepts</p>
+                                <ul className="list-disc pl-5 text-gray-700 space-y-1">
+                                  {answer.missingConcepts.map((concept, conceptIndex) => (
+                                    <li key={conceptIndex}>{concept}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {answer.improvementSuggestion && (
+                              <div>
+                                <p className="font-semibold text-gray-900 mb-1">Improvement Suggestion</p>
+                                <p className="text-gray-700 whitespace-pre-wrap">{answer.improvementSuggestion}</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <p className="text-gray-700 text-sm mt-2">{answer.feedback}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
